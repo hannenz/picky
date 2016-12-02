@@ -25,7 +25,7 @@ $(PRG): $(SOURCES) $(UIFILES)
 	$(VALAC) -o $(PRG) $(SOURCES) $(VALAFLAGS)
 
 install:
-	sudo mv libdocklet-picky.so /usr/lib/x86_64-linux-gnu/plank/docklets/
+	sudo cp libdocklet-picky.so /usr/lib/x86_64-linux-gnu/plank/docklets/
 	killall plank
 
 clean:

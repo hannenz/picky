@@ -133,9 +133,9 @@ namespace Picky {
 			weak uint8[] pixel = pixbuf.get_pixels();
 
 
-			current_color.red = (double)pixel[0] / 256.0;
-			current_color.green = (double)pixel[1] / 256.0;
-			current_color.blue = (double)pixel[2] / 256.0;
+			current_color.red = (double)pixel[0] / 255.0;
+			current_color.green = (double)pixel[1] / 255.0;
+			current_color.blue = (double)pixel[2] / 255.0;
 
 			switch (color_format) {
 				case 0:

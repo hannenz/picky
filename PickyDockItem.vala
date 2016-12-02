@@ -20,7 +20,7 @@ namespace Picky {
 		}
 
 
-		public PickyDockItem() {
+		construct {
 
 			unowned PickyPreferences prefs = (PickyPreferences) Prefs;
 			Icon = "preferences-color";
@@ -53,6 +53,8 @@ namespace Picky {
 			else {
 				Text = get_entry_at(cur_position);
 			}
+
+			save_palette();
 		}
 
 
@@ -168,9 +170,9 @@ namespace Picky {
 			try {
 				palette = GLib.File.new_for_path("/home/hannenz/.palettes/1.default");
 
-				/* if (!palette.query_exists()) { */
-				/* 	return false; */
-				/* } */
+				if (!palette.query_exists()) {
+					return false;
+				}
 
 				string line;
 				var dis = new DataInputStream(palette.read());
@@ -192,6 +194,7 @@ namespace Picky {
 
 
 		protected bool save_palette() {
+		
 			try {
 				if (palette.query_exists()) {
 					palette.delete();

@@ -28,13 +28,17 @@ namespace Picky {
 
 			switch (type) {
 				case ColorSpecType.HEX:
-					str = "#%02X%02X%02X".printf((int)(red * 256), (int)(green * 256), (int)(blue * 256));
+					str = "#%02X%02X%02X".printf(
+						(int)(red * 255.0),
+						(int)(green * 255.0),
+						(int)(blue * 255.0)
+					);
 					break;
 				case ColorSpecType.RGB:
-					str = "rgb(%u,%u,%u)".printf((int)(red * 256), (int)(green * 256), (int)(blue * 256));
+					str = "rgb(%u,%u,%u)".printf((int)(red * 255), (int)(green * 255), (int)(blue * 255));
 					break;
 				case ColorSpecType.RGBA:
-					str = "rgba(%u,%u,%u,255)".printf((int)(red * 256), (int)(green * 256), (int)(blue * 256));
+					str = "rgba(%u,%u,%u,255)".printf((int)(red * 255), (int)(green * 255), (int)(blue * 255));
 					break;
 				default:
 					str = "Invalid SpecType";
@@ -55,9 +59,9 @@ namespace Picky {
 
 			uint32 _col = 
 				(0xFF << 0) +
-				((uint32)(blue  * 256) << 8) +
-				((uint32)(green * 256) << 16) +
-				((uint32)(red   * 256) << 24) +
+				((uint32)(blue  * 255) << 8) +
+				((uint32)(green * 255) << 16) +
+				((uint32)(red   * 255) << 24) +
 				0
 			;
 
@@ -82,9 +86,9 @@ namespace Picky {
 			double nmatches = 0;
 			uint32 r,g,b,r1,g1,b1;
 
-			r = (int)(red * 256.0);
-			g = (int)(green * 256.0);
-			b = (int)(blue * 256.0);
+			r = (int)(red * 255.0);
+			g = (int)(green * 255.0);
+			b = (int)(blue * 255.0);
 
 			foreach (var x11color in x11names.entries) {
 
