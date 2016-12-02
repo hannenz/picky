@@ -12,23 +12,34 @@ namespace Picky {
 
 		ColorSpecType type = ColorSpecType.HEX;
 
+		GLib.File palette;
+
 
 		public PickyDockItem.with_dockitem_file(GLib.File file) {
 			GLib.Object(Prefs: new PickyPreferences.with_file(file));
 		}
 
 
-		construct {
+		public PickyDockItem() {
+
 			unowned PickyPreferences prefs = (PickyPreferences) Prefs;
-			Icon = "color-select-symbolic";
+			Icon = "preferences-color";
+
+
+
 			clipboard = Gtk.Clipboard.get(Gdk.Atom.intern("CLIPBOARD", true));
 			if (prefs.Format == "rgb") {
 				type = ColorSpecType.RGB;
 			}
 
 			colors = new Gee.ArrayList<Color?>();
+			load_palette();
 
 			updated();
+		}
+
+		~PickyDockItem () {
+			save_palette();
 		}
 
 
@@ -135,7 +146,7 @@ namespace Picky {
 			for (var i = colors.size; i > 0; i--) {
 				Color color = colors.get(i - 1);
 
-				var item = create_menu_item_with_pixbuf(color.get_string(type), color.get_pixbuf(16), true);
+				var item = create_menu_item_with_pixbuf("%s - %s".printf(color.get_string(type), color.to_x11name()), color.get_pixbuf(16), true);
 				var pos = i;
 				item.activate.connect( () => {
 					copy_entry_at(pos);
@@ -150,6 +161,57 @@ namespace Picky {
 			}
 
 			return items;
+		}
+
+
+		protected bool load_palette() {
+			try {
+				palette = GLib.File.new_for_path("/home/hannenz/.palettes/1.default");
+
+				/* if (!palette.query_exists()) { */
+				/* 	return false; */
+				/* } */
+
+				string line;
+				var dis = new DataInputStream(palette.read());
+
+				while ((line = dis.read_line(null)) != null) {
+					var color = Color();
+
+					if (color.parse(line)) {
+						add_color(color);
+					}
+				}
+			}
+			catch (Error e) {
+				return false;
+			}
+			return true;
+			
+		}
+
+
+		protected bool save_palette() {
+			try {
+				if (palette.query_exists()) {
+					palette.delete();
+				}
+
+				// Don't save empty palettes
+				if (colors.size > 0) {
+
+					var dos = new DataOutputStream(palette.create(FileCreateFlags.REPLACE_DESTINATION));
+
+					foreach (Color color in colors) {
+						dos.put_string(color.get_string(type) + "\n");
+					}
+				}
+			}
+			catch (Error e) {
+				return false;
+			}
+
+			return true;
 		}
 	}
 }	

@@ -1,3 +1,18 @@
+/**
+ * PickyDocklet
+ *
+ * A little color picker docklet for Plank
+ *
+ * @author Johannes Braun <johannes.braun@hannenz.de>
+ * @package picky
+ * @version 2016-12-02
+ * 
+ * @todo	Get mouse button working
+ * @todo	Save colors to file
+ * @todo	Integrate / combine "epick"
+ * @todo	Settings dialog
+ * @todo	Get x11name working again..
+ */
 
 public static void docklet_init(Plank.DockletManager manager) {
 	manager.register_docklet(typeof(Picky.PickyDocklet));
@@ -5,7 +20,7 @@ public static void docklet_init(Plank.DockletManager manager) {
 
 namespace Picky {
 
-	public class PickyDocklet : Object, Plank.Docklet{
+	public class PickyDocklet : Object, Plank.Docklet {
 
 		public unowned string get_id() {
 			return "picky";
@@ -20,7 +35,7 @@ namespace Picky {
 		}
 
 		public unowned string get_icon() {
-			return "color-select-symbolic";
+			return "preferences-color";
 		}
 
 		public bool is_supported() {

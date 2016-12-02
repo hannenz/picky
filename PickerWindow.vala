@@ -205,8 +205,6 @@ namespace Picky {
 			if (posY + previewSize >= display.get_default_screen().get_height()) {
 				posY = y - (offset + previewSize);
 			}
-
-
 		}
 	}
 }
