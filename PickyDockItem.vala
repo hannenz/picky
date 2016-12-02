@@ -168,7 +168,8 @@ namespace Picky {
 
 		protected bool load_palette() {
 			try {
-				palette = GLib.File.new_for_path("/home/hannenz/.palettes/1.default");
+				var filepath = GLib.Path.build_path(Path.DIR_SEPARATOR_S, Environment.get_home_dir(), ".palettes", "1.default");
+				palette = GLib.File.new_for_path(filepath);
 
 				if (!palette.query_exists()) {
 					return false;
