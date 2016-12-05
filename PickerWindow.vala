@@ -39,14 +39,14 @@ namespace Picky {
 
 			title = "Picky";
 			skip_pager_hint = true;
+			skip_taskbar_hint = true;
 
 			this.add_events(
 				EventMask.KEY_PRESS_MASK |
 				EventMask.BUTTON_PRESS_MASK
 			);
-			this.key_press_event.connect( (event_key) => {
 
-				debug ("Key: %u".printf(event_key.keyval));
+			this.key_press_event.connect( (event_key) => {
 
 				switch (event_key.keyval){
 					case 32:
@@ -205,6 +205,10 @@ namespace Picky {
 			if (posY + previewSize >= display.get_default_screen().get_height()) {
 				posY = y - (offset + previewSize);
 			}
+
+			move(posX, posY);
+
+			/* window.get_device_events(mouse); */
 		}
 	}
 }
