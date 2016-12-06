@@ -48,8 +48,8 @@ namespace Picky {
 				EventMask.KEY_PRESS_MASK |
 				EventMask.BUTTON_PRESS_MASK
 			);
-			this.key_press_event.connect( (event_key) => {
 
+			this.key_press_event.connect( (event_key) => {
 				switch (event_key.keyval){
 					case 32:
 						pick();
