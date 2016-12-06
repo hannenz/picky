@@ -15,6 +15,8 @@ namespace Picky {
 
 		protected Gdk.Device mouse;
 
+		protected Gdk.Device keyboard;
+
 		protected Gtk.DrawingArea preview;
 
 		protected int color_format;
@@ -36,17 +38,17 @@ namespace Picky {
 		 * Constructor
 		 */
 		public PickerWindow() {
+			Object(type: Gtk.WindowType.TOPLEVEL);
 
-			title = "Picky";
 			skip_pager_hint = true;
+			skip_taskbar_hint = true;
+			decorated = false;
 
 			this.add_events(
 				EventMask.KEY_PRESS_MASK |
 				EventMask.BUTTON_PRESS_MASK
 			);
 			this.key_press_event.connect( (event_key) => {
-
-				debug ("Key: %u".printf(event_key.keyval));
 
 				switch (event_key.keyval){
 					case 32:
@@ -61,11 +63,15 @@ namespace Picky {
 				return false;
 			});
 
+			this.button_press_event.connect( () => {
+				pick();
+				return true;
+			});
+
 
 			preview = new Gtk.DrawingArea();
 			preview.set_size_request(previewSize, previewSize);
 			preview.draw.connect(on_draw);
-
 			this.add(preview);
 
 			window = Gdk.get_default_root_window();
@@ -75,8 +81,10 @@ namespace Picky {
 			if (mouse == null) {
 				error("Could not get device (mouse)");
 			}
-
-			window.set_events(EventMask.BUTTON_PRESS_MASK);
+			keyboard = mouse.get_associated_device();
+			if (keyboard == null) {
+				error("Could not get device (keyboard)");
+			}
 
 			clipboard = Gtk.Clipboard.get_for_display(display, Gdk.SELECTION_CLIPBOARD);
 
@@ -94,13 +102,8 @@ namespace Picky {
 
 		public void open_picker () {
 			var crosshair = new Gdk.Cursor.for_display(display, Gdk.CursorType.CROSSHAIR);
-			this.mouse.grab(this.window, Gdk.GrabOwnership.APPLICATION, false, EventMask.ALL_EVENTS_MASK, crosshair, Gdk.CURRENT_TIME);
-
-			this.button_press_event.connect( () => {
-				debug("A mouse button has been clicked\n");
-				return false;
-			});
-
+			this.mouse.grab(this.get_window(), Gdk.GrabOwnership.APPLICATION, false, EventMask.BUTTON_PRESS_MASK | EventMask.BUTTON_RELEASE_MASK | EventMask.POINTER_MOTION_MASK, crosshair, Gdk.CURRENT_TIME);
+			this.keyboard.grab(this.get_window(), Gdk.GrabOwnership.APPLICATION, false, EventMask.KEY_PRESS_MASK | EventMask.KEY_RELEASE_MASK, null, Gdk.CURRENT_TIME);
 			this.show_all();
 		}
 
@@ -109,17 +112,17 @@ namespace Picky {
 
 		protected void close_picker () {
 			this.mouse.ungrab(Gdk.CURRENT_TIME);
+			this.keyboard.ungrab(Gdk.CURRENT_TIME);
 			this.hide();
 		}
-
 
 		
 
 		protected void pick() {
 
 			/* clipboard.set_text(color_string, -1); */
+			close_picker();
 			picked(current_color);
-
 		}
 
 
@@ -193,7 +196,7 @@ namespace Picky {
 			preview.queue_draw();
 
 			// Move window (track mouse position)
-			int x, y, posX, posY, offset = 0;
+			int x, y, posX, posY, offset = 50;
 
 			window.get_device_position(mouse, out x, out y, null);
 			posX = x + offset;
@@ -205,6 +208,8 @@ namespace Picky {
 			if (posY + previewSize >= display.get_default_screen().get_height()) {
 				posY = y - (offset + previewSize);
 			}
+
+			move(posX, posY);
 		}
 	}
 }
