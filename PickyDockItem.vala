@@ -14,6 +14,8 @@ namespace Picky {
 		ColorSpecType type = ColorSpecType.HEX;
 
 		GLib.File palette;
+		
+		Gdk.Pixbuf icon_pixbuf;
 
 
 		public PickyDockItem.with_dockitem_file(GLib.File file) {
@@ -28,8 +30,15 @@ namespace Picky {
 			unowned PickyPreferences prefs = (PickyPreferences) Prefs;
 			
 			Icon = "resource://" + Picky.G_RESOURCE_PATH + "/icons/color_picker.png";
-			CountVisible = true;
+			CountVisible = false;
 
+			try {
+				icon_pixbuf = new Gdk.Pixbuf.from_resource(Picky.G_RESOURCE_PATH + "/icons/color_picker.png");
+			}
+			catch (Error e) {
+				warning("Error: " + e.message);
+			}
+			
 			clipboard = Gtk.Clipboard.get(Gdk.Atom.intern("CLIPBOARD", true));
 			
 			switch (prefs.Format) {
@@ -47,6 +56,7 @@ namespace Picky {
 
 			colors = new Gee.ArrayList<Color?>();
 
+
 			var filepath = GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S, Environment.get_home_dir(), Picky.PALETTE_FILE);
 			palette = GLib.File.new_for_path(filepath);
 
@@ -61,9 +71,8 @@ namespace Picky {
 		}
 
 
-		protected override void draw_icon(Plank.Surface surface) {
 
-			Logger.notification("re-drawing the icon");
+		protected override void draw_icon(Plank.Surface surface) {
 
 			Color color;
 			if (colors.size == 0) {
@@ -75,12 +84,21 @@ namespace Picky {
 			else {
 				color = colors.get(cur_position - 1);
 			}
-			Cairo.Context ctx = surface.Context;
-			var pixbuf = color.get_pixbuf();
 
-			Gdk.cairo_set_source_pixbuf(ctx, pixbuf, 0, 0);
+			Cairo.Context ctx = surface.Context;
+			/* var pixbuf = color.get_pixbuf(); */
+
+			Gdk.Pixbuf pb = icon_pixbuf.scale_simple(surface.Width, surface.Height, Gdk.InterpType.BILINEAR);
+			Gdk.cairo_set_source_pixbuf(ctx, pb, 0, 0);
 			ctx.paint();
 
+			ctx.set_line_width(1);
+			ctx.set_tolerance(0.1);
+
+			ctx.set_source_rgb(color.red, color.green, color.blue);
+			ctx.arc(surface.Width / 2, surface.Height / 2, surface.Width / 6, 0, 2 * Math.PI);
+
+			ctx.fill();
 			surface.Internal.mark_dirty();
 		}
 
@@ -98,34 +116,35 @@ namespace Picky {
 
 			Count = colors.size;
 			save_palette();
-			Logger.notification("Emitting signal 'needs_redraw'");
-			needs_redraw();
+
+			/* needs_redraw(); */
 			reset_icon_buffer();
 		}
+
+
 
 		protected override AnimationType on_scrolled(Gdk.ScrollDirection direction, Gdk.ModifierType mod, uint32 event_time) {
 			
 			switch (direction) {
 				case Gdk.ScrollDirection.UP:
-					Logger.notification("Scrolling up");
-					cur_position++;
-					if (cur_position >= colors.size) {
+					if (++cur_position >= colors.size) {
 						cur_position = 0;
 					}
 					break;
 				case Gdk.ScrollDirection.DOWN:
-					Logger.notification("Scrolling down");
-					cur_position--;
-					if (cur_position < 0) {
+					if (--cur_position < 0) {
 						cur_position = colors.size - 1;
 					}
 					break;
 			}
+
 			copy_entry_at(cur_position);
-			needs_redraw();
+			/* needs_redraw(); */
 			reset_icon_buffer();
+
 			return AnimationType.NONE;
 		}
+
 
 
 		void add_color(Color color) {

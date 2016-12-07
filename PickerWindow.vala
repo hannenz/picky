@@ -115,6 +115,7 @@ namespace Picky {
 			display = Display.get_default();
 			manager = display.get_device_manager();
 			mouse = manager.get_client_pointer();
+
 			if (mouse == null) {
 				error("Could not get device (mouse)");
 			}
@@ -204,7 +205,7 @@ namespace Picky {
 
 			ctx.rectangle(0, 0, previewSize, previewSize);
 			ctx.stroke();
-			ctx.set_source_rgb(0, 0, 0);
+			ctx.set_source_rgb(0.2, 0.2, 0.2);
 			ctx.rectangle(1, 1, previewSize - 2, previewSize - 2);
 			ctx.stroke();
 
