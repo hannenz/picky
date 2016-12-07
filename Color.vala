@@ -9,7 +9,8 @@ namespace Picky {
 	public enum ColorSpecType {
 		HEX,
 		RGB,
-		RGBA
+		RGBA,
+		X11NAME
 	}
 
 	public struct Color : Gdk.RGBA {
@@ -19,6 +20,15 @@ namespace Picky {
 			populate_x11names();
 
 			alpha = 1.0;
+		}
+
+		public Color.from_bgcolor(Color bgcol) {
+			double d = bgcol.get_matching_fgcolor();
+			
+			red = d;
+			blue = d;
+			green = d;
+
 		}
 
 
@@ -40,6 +50,9 @@ namespace Picky {
 				case ColorSpecType.RGBA:
 					str = "rgba(%u,%u,%u,255)".printf((int)(red * 255), (int)(green * 255), (int)(blue * 255));
 					break;
+				case ColorSpecType.X11NAME:
+					str = to_x11name();
+					break;
 				default:
 					str = "Invalid SpecType";
 					break;
@@ -47,6 +60,21 @@ namespace Picky {
 
 			return str;
 		}
+
+
+		/** 
+		 * Calculate light/dark text color depending on the bg color
+		 * Algorithm from: [http://stackoverflow.com/a/1855903]
+		 */
+		public double  get_matching_fgcolor() {
+			double d = 0.25;
+			double a = 1 - (((0.299 * red * 255) + (0.587 * green * 255) + (0.114 * blue * 255)) / 255.0);
+			if (a >= 0.5) {
+				d = 1.0;
+			}
+			return d;
+		}
+
 
 
 		/**

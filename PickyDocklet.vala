@@ -7,11 +7,7 @@
  * @package picky
  * @version 2016-12-02
  * 
- * @todo	Get mouse button working
- * @todo	Save colors to file
- * @todo	Integrate / combine "epick"
  * @todo	Settings dialog
- * @todo	Get x11name working again..
  */
 
 public static void docklet_init(Plank.DockletManager manager) {
@@ -20,7 +16,17 @@ public static void docklet_init(Plank.DockletManager manager) {
 
 namespace Picky {
 
+
+	/**
+	 * Resource path for the icon
+	 */
 	public const string G_RESOURCE_PATH = "/de/hannenz/picky";
+
+	/**
+	 * Filename for palette storage (in home directory)
+	 */
+	public const string PALETTE_FILE = ".picky";
+
 
 	public class PickyDocklet : Object, Plank.Docklet {
 
@@ -33,12 +39,11 @@ namespace Picky {
 		}
 
 		public unowned string get_description() {
-			return "A color picker docklet";
+			return "A color picker docklet for plank/docky";
 		}
 
 		public unowned string get_icon() {
 			return "resource://" + Picky.G_RESOURCE_PATH + "/icons/color_picker.png";
-			/* return "preferences-color"; */
 		}
 
 		public bool is_supported() {

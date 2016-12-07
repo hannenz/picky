@@ -27,7 +27,7 @@ $(PRG): $(SOURCES) $(UIFILES)
 
 install:
 	cp libdocklet-picky.so /usr/lib/x86_64-linux-gnu/plank/docklets/
-	killall plank
+	# killall plank
 
 
 

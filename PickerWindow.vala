@@ -32,6 +32,7 @@ namespace Picky {
 		protected const int previewSize = 150;
 		protected const double minPreviewScale = 1;
 		protected const double maxPreviewScale = 16;
+
 		protected double previewScale = 4;
 
 		public signal void picked(Color color_string);
@@ -174,7 +175,6 @@ namespace Picky {
 		}
 
 
-
 		private bool on_draw(Context ctx) {
 			int x, y;
 
@@ -187,25 +187,9 @@ namespace Picky {
 			current_color.green = (double)pixel[1] / 255.0;
 			current_color.blue = (double)pixel[2] / 255.0;
 
-			switch (color_format) {
-				case ColorSpecType.HEX: 
-					color_string = "#" + pixel[0].to_string("%02X") + pixel[1].to_string("%02X") + pixel[2].to_string("%02X");
-					break;
-				case ColorSpecType.RGB:
-				default:
-					color_string = "rgb(%u,%u,%u)".printf(pixel[0], pixel[1], pixel[2]);
-					break;
-			}
+			color_string = current_color.get_string(color_format);
 
-			/** 
-			 * Calculate light/dark text color depending on the bg color
-			 * Algorithm from: [http://stackoverflow.com/a/1855903]
-			 */
-			double d = 0.25;
-			double a = 1 - ( 0.299 * pixel[0] + 0.587 * pixel[1] + 0.114 * pixel[2])/255;
-			if (a >= 0.5) {
-				d = 1.0;
-			}
+			Color fgcol = new Color.from_bgcolor(current_color);
 
 			Pixbuf _pixbuf = Gdk.pixbuf_get_from_window(window, x - (int)(previewSize / (2 * previewScale)), y - (int)(previewSize / (2* previewScale)), (int)(previewSize / previewScale), (int)(previewSize / previewScale));
 			Pixbuf pixbuf2 = _pixbuf.scale_simple(previewSize, previewSize, InterpType.TILES);
@@ -214,7 +198,7 @@ namespace Picky {
 
 			ctx.set_line_width(1);
 			ctx.set_tolerance(0.1);
-			ctx.set_source_rgb(d,d,d);
+			ctx.set_source_rgb(fgcol.red, fgcol.green, fgcol.blue);
 			ctx.arc(previewSize / 2, previewSize / 2, 3, 0, 2 * Math.PI);
 			ctx.stroke();
 
@@ -228,11 +212,11 @@ namespace Picky {
 			ctx.rectangle(2, previewSize - 24, previewSize - 4, 22);
 			ctx.fill();
 
-			ctx.set_source_rgb(d, d, d);
+			ctx.set_source_rgb(fgcol.red, fgcol.green, fgcol.blue);
 			ctx.select_font_face ("Sans", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
 			ctx.set_font_size (13.0);
 			ctx.move_to (4, previewSize - 8);
-			ctx.show_text (color_string + " @%.2f".printf(previewScale));
+			ctx.show_text (color_string);
 			return false;
 		}
 
@@ -243,7 +227,7 @@ namespace Picky {
 			preview.queue_draw();
 
 			// Move window (track mouse position)
-			int x, y, posX, posY, offset = 50;
+			int x, y, posX, posY, offset = 75;
 
 			window.get_device_position(mouse, out x, out y, null);
 			posX = x + offset;

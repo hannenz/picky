@@ -1,4 +1,5 @@
 using Plank;
+using Cairo;
 
 namespace Picky {
 	
@@ -22,29 +23,65 @@ namespace Picky {
 
 		construct {
 
+			Logger.initialize("picky");
+			Logger.DisplayLevel = LogLevel.NOTIFY;
 			unowned PickyPreferences prefs = (PickyPreferences) Prefs;
 			
-			/* Icon = "preferences-color"; */
 			Icon = "resource://" + Picky.G_RESOURCE_PATH + "/icons/color_picker.png";
-		/* try { */
-			/* 	ForcePixbuf = new Gdk.Pixbuf.from_file("/home/hannenz/picky/color_picker.png"); */
-			/* } catch (Error e) { */
-			/* 	error ("Could not load icon"); */
-			/* } */
+			CountVisible = true;
 
 			clipboard = Gtk.Clipboard.get(Gdk.Atom.intern("CLIPBOARD", true));
-			if (prefs.Format == "rgb") {
-				type = ColorSpecType.RGB;
+			
+			switch (prefs.Format) {
+				case "rgb":
+					type = ColorSpecType.RGB;
+					break;
+				case "x11name":
+					type = ColorSpecType.X11NAME;
+					break;
+				case "hex":
+				default:
+					type = ColorSpecType.HEX;
+					break;
 			}
 
 			colors = new Gee.ArrayList<Color?>();
+
+			var filepath = GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S, Environment.get_home_dir(), Picky.PALETTE_FILE);
+			palette = GLib.File.new_for_path(filepath);
+
 			load_palette();
 
 			updated();
 		}
 
+
 		~PickyDockItem () {
 			save_palette();
+		}
+
+
+		protected override void draw_icon(Plank.Surface surface) {
+
+			Logger.notification("re-drawing the icon");
+
+			Color color;
+			if (colors.size == 0) {
+				return;
+			}
+			else if (cur_position == 0 || cur_position > colors.size) {
+				color = colors.get(colors.size - 1);
+			}
+			else {
+				color = colors.get(cur_position - 1);
+			}
+			Cairo.Context ctx = surface.Context;
+			var pixbuf = color.get_pixbuf();
+
+			Gdk.cairo_set_source_pixbuf(ctx, pixbuf, 0, 0);
+			ctx.paint();
+
+			surface.Internal.mark_dirty();
 		}
 
 
@@ -59,7 +96,35 @@ namespace Picky {
 				Text = get_entry_at(cur_position);
 			}
 
+			Count = colors.size;
 			save_palette();
+			Logger.notification("Emitting signal 'needs_redraw'");
+			needs_redraw();
+			reset_icon_buffer();
+		}
+
+		protected override AnimationType on_scrolled(Gdk.ScrollDirection direction, Gdk.ModifierType mod, uint32 event_time) {
+			
+			switch (direction) {
+				case Gdk.ScrollDirection.UP:
+					Logger.notification("Scrolling up");
+					cur_position++;
+					if (cur_position >= colors.size) {
+						cur_position = 0;
+					}
+					break;
+				case Gdk.ScrollDirection.DOWN:
+					Logger.notification("Scrolling down");
+					cur_position--;
+					if (cur_position < 0) {
+						cur_position = colors.size - 1;
+					}
+					break;
+			}
+			copy_entry_at(cur_position);
+			needs_redraw();
+			reset_icon_buffer();
+			return AnimationType.NONE;
 		}
 
 
@@ -73,7 +138,7 @@ namespace Picky {
 
 			colors.add(color);
 
-			while (colors.size >= prefs.MaxEntries) {
+			while (colors.size > prefs.MaxEntries) {
 				colors.remove_at(0);
 			}
 
@@ -110,14 +175,14 @@ namespace Picky {
 		}
 
 
-		void copy_entry() {
-			if (cur_position == 0) {
-				copy_entry_at(colors.size);
-			}
-			else {
-				copy_entry_at(cur_position);
-			}
-		}
+		/* void copy_entry() { */
+		/* 	if (cur_position == 0) { */
+		/* 		copy_entry_at(colors.size); */
+		/* 	} */
+		/* 	else { */
+		/* 		copy_entry_at(cur_position); */
+		/* 	} */
+		/* } */
 
 
 		void clear() {
@@ -136,6 +201,8 @@ namespace Picky {
 				var picker_window = new Picky.PickerWindow(type);
 				picker_window.picked.connect( (color) => {
 					add_color(color);
+					State = ItemState.URGENT;
+					Logger.notification("Pcked a color: " + color.get_string(type));
 				});
 				picker_window.open_picker();
 
@@ -151,7 +218,12 @@ namespace Picky {
 			for (var i = colors.size; i > 0; i--) {
 				Color color = colors.get(i - 1);
 
-				var item = create_menu_item_with_pixbuf("%s - %s".printf(color.get_string(type), color.to_x11name()), color.get_pixbuf(16), true);
+				var label = color.get_string(type);
+				if (type != ColorSpecType.X11NAME) {
+					label += " - %s".printf(color.to_x11name());
+				}
+
+				var item = create_menu_item_with_pixbuf(label, color.get_pixbuf(16), true);
 				var pos = i;
 				item.activate.connect( () => {
 					copy_entry_at(pos);
@@ -171,8 +243,6 @@ namespace Picky {
 
 		protected bool load_palette() {
 			try {
-				var filepath = GLib.Path.build_path(Path.DIR_SEPARATOR_S, Environment.get_home_dir(), ".palettes", "1.default");
-				palette = GLib.File.new_for_path(filepath);
 
 				if (!palette.query_exists()) {
 					return false;
