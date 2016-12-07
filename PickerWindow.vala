@@ -85,15 +85,19 @@ namespace Picky {
 			});
 
 			this.scroll_event.connect( (event_scroll) => {
+
 				switch (event_scroll.direction) {
 					case ScrollDirection.UP:
-						if (previewScale < maxPreviewScale) {
-							previewScale += 1;
+						previewScale *= 1.33333;
+						if (previewScale > maxPreviewScale) {
+							previewScale = maxPreviewScale;
 						}
 						break;
+
 					case ScrollDirection.DOWN:
-						if (previewScale > minPreviewScale) {
-							previewScale -= 1;
+						previewScale *= 0.66667;
+						if (previewScale < minPreviewScale) {
+							previewScale = minPreviewScale;
 						}
 						break;
 				}
@@ -228,7 +232,7 @@ namespace Picky {
 			ctx.select_font_face ("Sans", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
 			ctx.set_font_size (13.0);
 			ctx.move_to (4, previewSize - 8);
-			ctx.show_text (color_string + "/%.1f".printf(previewScale));
+			ctx.show_text (color_string + " @%.2f".printf(previewScale));
 			return false;
 		}
 
