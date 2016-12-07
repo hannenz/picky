@@ -31,7 +31,7 @@ namespace Picky {
 		// Constants 
 		protected const int previewSize = 150;
 		protected const double minPreviewScale = 1;
-		protected const double maxPreviewScale = 10;
+		protected const double maxPreviewScale = 16;
 		protected double previewScale = 4;
 
 		public signal void picked(Color color_string);
