@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gresources>
+	<gresource prefix="/de/hannenz/picky">
+		<file>icons/color_picker.png</file>
+	</gresource>
+</gresources>
+

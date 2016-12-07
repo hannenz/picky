@@ -22,11 +22,14 @@ UIFILES =
 
 all: $(PRG)
 $(PRG): $(SOURCES) $(UIFILES)
-	$(VALAC) -o $(PRG) $(SOURCES) $(VALAFLAGS)
+	glib-compile-resources picky.gresource.xml --target=resources.c --generate-source
+	$(VALAC) -o $(PRG) $(SOURCES) resources.c $(VALAFLAGS)
 
 install:
 	cp libdocklet-picky.so /usr/lib/x86_64-linux-gnu/plank/docklets/
 	killall plank
+
+
 
 clean:
 	# rm -f $(OBJS)

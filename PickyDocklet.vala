@@ -20,6 +20,8 @@ public static void docklet_init(Plank.DockletManager manager) {
 
 namespace Picky {
 
+	public const string G_RESOURCE_PATH = "/de/hannenz/picky";
+
 	public class PickyDocklet : Object, Plank.Docklet {
 
 		public unowned string get_id() {
@@ -35,7 +37,8 @@ namespace Picky {
 		}
 
 		public unowned string get_icon() {
-			return "preferences-color";
+			return "resource://" + Picky.G_RESOURCE_PATH + "/icons/color_picker.png";
+			/* return "preferences-color"; */
 		}
 
 		public bool is_supported() {

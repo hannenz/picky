@@ -24,12 +24,13 @@ namespace Picky {
 
 			unowned PickyPreferences prefs = (PickyPreferences) Prefs;
 			
-			Icon = "preferences-color";
-			try {
-				ForcePixbuf = new Gdk.Pixbuf.from_file("/home/hannenz/picky/color_picker.png");
-			} catch (Error e) {
-				error ("Could not load icon");
-			}
+			/* Icon = "preferences-color"; */
+			Icon = "resource://" + Picky.G_RESOURCE_PATH + "/icons/color_picker.png";
+		/* try { */
+			/* 	ForcePixbuf = new Gdk.Pixbuf.from_file("/home/hannenz/picky/color_picker.png"); */
+			/* } catch (Error e) { */
+			/* 	error ("Could not load icon"); */
+			/* } */
 
 			clipboard = Gtk.Clipboard.get(Gdk.Atom.intern("CLIPBOARD", true));
 			if (prefs.Format == "rgb") {
