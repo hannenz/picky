@@ -38,7 +38,7 @@ namespace Picky {
 		 * Constructor
 		 */
 		public PickerWindow() {
-			Object(type: Gtk.WindowType.TOPLEVEL);
+			Object(type: Gtk.WindowType.POPUP);
 
 			skip_pager_hint = true;
 			skip_taskbar_hint = true;
@@ -120,7 +120,7 @@ namespace Picky {
 
 		protected void pick() {
 
-			/* clipboard.set_text(color_string, -1); */
+			clipboard.set_text(color_string, -1);
 			close_picker();
 			picked(current_color);
 		}
