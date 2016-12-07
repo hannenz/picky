@@ -23,9 +23,13 @@ namespace Picky {
 		construct {
 
 			unowned PickyPreferences prefs = (PickyPreferences) Prefs;
+			
 			Icon = "preferences-color";
-
-
+			try {
+				ForcePixbuf = new Gdk.Pixbuf.from_file("/home/hannenz/picky/color_picker.png");
+			} catch (Error e) {
+				error ("Could not load icon");
+			}
 
 			clipboard = Gtk.Clipboard.get(Gdk.Atom.intern("CLIPBOARD", true));
 			if (prefs.Format == "rgb") {
@@ -128,9 +132,7 @@ namespace Picky {
 
 			if (button == PopupButton.LEFT) {
 
-				var picker_window = new Picky.PickerWindow();
-				/* picker_window.show_all(); */
-				/* picker_window.present(); */
+				var picker_window = new Picky.PickerWindow(type);
 				picker_window.picked.connect( (color) => {
 					add_color(color);
 				});
