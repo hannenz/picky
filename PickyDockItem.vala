@@ -27,6 +27,7 @@ namespace Picky {
 
 			Logger.initialize("picky");
 			Logger.DisplayLevel = LogLevel.NOTIFY;
+
 			unowned PickyPreferences prefs = (PickyPreferences) Prefs;
 			
 			Icon = "resource://" + Picky.G_RESOURCE_PATH + "/icons/color_picker.png";
@@ -74,6 +75,13 @@ namespace Picky {
 
 		protected override void draw_icon(Plank.Surface surface) {
 
+			Cairo.Context ctx = surface.Context;
+			/* var pixbuf = color.get_pixbuf(); */
+
+			Gdk.Pixbuf pb = icon_pixbuf.scale_simple(surface.Width, surface.Height, Gdk.InterpType.BILINEAR);
+			Gdk.cairo_set_source_pixbuf(ctx, pb, 0, 0);
+			ctx.paint();
+
 			Color color;
 			if (colors.size == 0) {
 				return;
@@ -85,21 +93,16 @@ namespace Picky {
 				color = colors.get(cur_position - 1);
 			}
 
-			Cairo.Context ctx = surface.Context;
-			/* var pixbuf = color.get_pixbuf(); */
-
-			Gdk.Pixbuf pb = icon_pixbuf.scale_simple(surface.Width, surface.Height, Gdk.InterpType.BILINEAR);
-			Gdk.cairo_set_source_pixbuf(ctx, pb, 0, 0);
-			ctx.paint();
-
-			ctx.set_line_width(1);
-			ctx.set_tolerance(0.1);
 
 			ctx.set_source_rgb(color.red, color.green, color.blue);
 			ctx.arc(surface.Width / 2, surface.Height / 2, surface.Width / 6, 0, 2 * Math.PI);
-
 			ctx.fill();
-			surface.Internal.mark_dirty();
+
+			ctx.arc(surface.Width / 2, surface.Height / 2, (surface.Width / 6) + 1, 0, 2 * Math.PI);
+			ctx.set_source_rgb(255,255,255);
+			ctx.set_line_width(2);
+			ctx.set_tolerance(0.1);
+			ctx.stroke();
 		}
 
 
