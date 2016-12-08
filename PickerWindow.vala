@@ -6,35 +6,17 @@ namespace Picky {
 
 	public class PickerWindow : Gtk.Window {
 
-
 		protected Gdk.Window window;
-
-		protected Gdk.Display display;
-
-		protected DeviceManager manager;
-
-		protected Gdk.Device mouse;
-
-		protected Gdk.Device keyboard;
-
-		/* protected Gtk.DrawingArea preview; */
 		protected ColorPreview preview;
-
 		protected ColorSpecType color_format;
-
 		protected string color_string;
-
-		protected Color current_color;
-
 		protected Clipboard clipboard;
-
+		protected Gdk.Display display;
+		protected Gdk.Device mouse;
+		protected Gdk.Device keyboard;
 
 		// Constants 
 		protected const int previewSize = 150;
-		protected const double minPreviewScale = 1;
-		protected const double maxPreviewScale = 16;
-
-		protected double previewScale = 4;
 
 		public signal void picked(Color color_string);
 
@@ -58,12 +40,24 @@ namespace Picky {
 
 			this.key_press_event.connect( (event_key) => {
 				switch (event_key.keyval){
-					case 32:
+					case Gdk.Key.space:
 						pick();
+						if ((Gdk.ModifierType.SHIFT_MASK & event_key.state) == 0) {
+							close_picker();
+						}
 						break;
 
+					case Gdk.Key.Escape:
+						close_picker();
+						break;
+
+					case Gdk.Key.F9:
+						preview.size -= 10;
+						break;
+					case Gdk.Key.F10:
+						preview.size += 10;
+						break;
 					default:
-						close_picker ();
 						break;
 
 				}
@@ -90,33 +84,24 @@ namespace Picky {
 
 				switch (event_scroll.direction) {
 					case ScrollDirection.UP:
-						previewScale *= 1.33333;
-						if (previewScale > maxPreviewScale) {
-							previewScale = maxPreviewScale;
-						}
+						preview.scale_up();
 						break;
 
 					case ScrollDirection.DOWN:
-						previewScale *= 0.66667;
-						if (previewScale < minPreviewScale) {
-							previewScale = minPreviewScale;
-						}
+						preview.scale_down();
 						break;
 				}
 				return true;
 			});
 
 
-			/* preview = new Gtk.DrawingArea(); */
-			/* preview.set_size_request(previewSize, previewSize); */
-			/* preview.draw.connect(on_draw); */
 			preview = new ColorPreview();
 			preview.size = 150;
 			this.add(preview);
 
 			window = Gdk.get_default_root_window();
 			display = Display.get_default();
-			manager = display.get_device_manager();
+			var manager = display.get_device_manager();
 			mouse = manager.get_client_pointer();
 
 			if (mouse == null) {
@@ -175,53 +160,7 @@ namespace Picky {
 		protected void pick() {
 
 			clipboard.set_text(color_string, -1);
-			picked(current_color);
-		}
-
-
-		private bool on_draw(Context ctx) {
-			int x, y;
-
-			window.get_device_position(mouse, out x, out y, null);
-
-			Pixbuf pixbuf = Gdk.pixbuf_get_from_window(this.window, x, y, 1, 1);
-			weak uint8[] pixel = pixbuf.get_pixels();
-
-			current_color.red = (double)pixel[0] / 255.0;
-			current_color.green = (double)pixel[1] / 255.0;
-			current_color.blue = (double)pixel[2] / 255.0;
-
-			color_string = current_color.get_string(color_format);
-
-			Color fgcol = Color.from_bgcolor(current_color);
-
-			Pixbuf _pixbuf = Gdk.pixbuf_get_from_window(window, x - (int)(previewSize / (2 * previewScale)), y - (int)(previewSize / (2* previewScale)), (int)(previewSize / previewScale), (int)(previewSize / previewScale));
-			Pixbuf pixbuf2 = _pixbuf.scale_simple(previewSize, previewSize, InterpType.TILES);
-			Gdk.cairo_set_source_pixbuf(ctx, pixbuf2, 0, 0);
-			ctx.paint();
-
-			ctx.set_line_width(1);
-			ctx.set_tolerance(0.1);
-			ctx.set_source_rgb(fgcol.red, fgcol.green, fgcol.blue);
-			ctx.arc(previewSize / 2, previewSize / 2, 3, 0, 2 * Math.PI);
-			ctx.stroke();
-
-			ctx.rectangle(0, 0, previewSize, previewSize);
-			ctx.stroke();
-			ctx.set_source_rgb(0.2, 0.2, 0.2);
-			ctx.rectangle(1, 1, previewSize - 2, previewSize - 2);
-			ctx.stroke();
-
-			ctx.set_source_rgba(current_color.red, current_color.green, current_color.blue, 1.0);
-			ctx.rectangle(2, previewSize - 24, previewSize - 4, 22);
-			ctx.fill();
-
-			ctx.set_source_rgb(fgcol.red, fgcol.green, fgcol.blue);
-			ctx.select_font_face ("Sans", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
-			ctx.set_font_size (13.0);
-			ctx.move_to (4, previewSize - 8);
-			ctx.show_text (color_string);
-			return false;
+			picked(preview.color);
 		}
 
 

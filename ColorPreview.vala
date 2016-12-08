@@ -8,28 +8,48 @@ namespace Picky {
 		
 		public int size { get; set; default = 64; }
 		public double scale { get; set; default = 4.0; }
-		protected ColorSpecType color_format { get; set; default = ColorSpecType.HEX; }
+		public double scale_factor { get; set; default = 1.3333; }
+		public double min_scale { get; set; default = 1.0; }
+		public double max_scale { get; set; default = 16.0; }
+		public Color color {get; set; }
+		public ColorSpecType color_format { get; set; default = ColorSpecType.HEX; }
 		private Gdk.Window window;
 		private Gdk.Device mouse;
 
 		public ColorPreview() {
+			
 			set_size_request(size, size);
-			size.changed.connect( () => {
+
+			this.notify["size"].connect( (s, p) => {
+				if (size < 20) {
+					size = 20;
+				}
+				if (size > 500) {
+					size = 500;
+				}
 				set_size_request(size, size);
 			});
+
 			draw.connect(on_draw);
 
 			window = Gdk.get_default_root_window();
 			var display = Display.get_default();
 			var manager = display.get_device_manager();
 			mouse = manager.get_client_pointer();
-			/* mouse = Display.get_default().get_device_manager().get_client_pointer(); */
+		}
+
+		public void scale_up() {
+			scale = double.min(scale * scale_factor, max_scale);
+		}
+		
+		public void scale_down() {
+			scale = double.max(scale / scale_factor, min_scale);
 		}
 
 		protected bool on_draw(Context ctx) {
 
 			Gdk.Pixbuf pixel_pb, tmp_pb, pb;
-			Color color, fgcol;
+			Color fgcol;
 			weak uint8[] pixel;
 			int x, y;
 			string color_string;
@@ -37,10 +57,11 @@ namespace Picky {
 			window.get_device_position(mouse, out x, out y, null);
 			pixel_pb = Gdk.pixbuf_get_from_window(window, x, y, 1, 1);
 			pixel = pixel_pb.get_pixels();
-			color = Color();
-			color.red = (double)pixel[0] / 255;
-			color.green = (double)pixel[1] / 255;
-			color.blue = (double)pixel[2] / 255;
+			color = Color() {
+				red = (double)pixel[0] / 255,
+				green = (double)pixel[1] / 255,
+				blue = (double)pixel[2] / 255
+			};
 			color_string = color.get_string(color_format);
 			fgcol = Color.from_bgcolor(color);
 
@@ -79,7 +100,6 @@ namespace Picky {
 			ctx.show_text(color_string);
 
 			return false;
-
 		}
 	}
 }
