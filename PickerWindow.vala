@@ -17,7 +17,8 @@ namespace Picky {
 
 		protected Gdk.Device keyboard;
 
-		protected Gtk.DrawingArea preview;
+		/* protected Gtk.DrawingArea preview; */
+		protected ColorPreview preview;
 
 		protected ColorSpecType color_format;
 
@@ -106,9 +107,11 @@ namespace Picky {
 			});
 
 
-			preview = new Gtk.DrawingArea();
-			preview.set_size_request(previewSize, previewSize);
-			preview.draw.connect(on_draw);
+			/* preview = new Gtk.DrawingArea(); */
+			/* preview.set_size_request(previewSize, previewSize); */
+			/* preview.draw.connect(on_draw); */
+			preview = new ColorPreview();
+			preview.size = 150;
 			this.add(preview);
 
 			window = Gdk.get_default_root_window();
@@ -190,7 +193,7 @@ namespace Picky {
 
 			color_string = current_color.get_string(color_format);
 
-			Color fgcol = new Color.from_bgcolor(current_color);
+			Color fgcol = Color.from_bgcolor(current_color);
 
 			Pixbuf _pixbuf = Gdk.pixbuf_get_from_window(window, x - (int)(previewSize / (2 * previewScale)), y - (int)(previewSize / (2* previewScale)), (int)(previewSize / previewScale), (int)(previewSize / previewScale));
 			Pixbuf pixbuf2 = _pixbuf.scale_simple(previewSize, previewSize, InterpType.TILES);

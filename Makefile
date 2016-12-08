@@ -11,7 +11,8 @@ SOURCES = PickyDocklet.vala\
 		PickyDockItem.vala\
 		PickyPreferences.vala\
 		PickerWindow.vala\
-		Color.vala
+		Color.vala\
+		ColorPreview.vala
 
 UIFILES =
 
