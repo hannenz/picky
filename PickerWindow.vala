@@ -14,19 +14,18 @@ namespace Picky {
 		protected Gdk.Display display;
 		protected Gdk.Device mouse;
 		protected Gdk.Device keyboard;
-
-		// Constants 
-		protected const int previewSize = 150;
+		protected int preview_size;
 
 		public signal void picked(Color color_string);
 
 		/**
 		 * Constructor
 		 */
-		public PickerWindow(ColorSpecType type) {
+		public PickerWindow(ColorSpecType type, int size) {
 			Object(type: Gtk.WindowType.POPUP);
 
 			color_format = type;
+			preview_size = size;
 
 			skip_pager_hint = true;
 			skip_taskbar_hint = true;
@@ -53,9 +52,11 @@ namespace Picky {
 
 					case Gdk.Key.F9:
 						preview.size -= 10;
+						set_default_size(preview.size, preview.size);
 						break;
 					case Gdk.Key.F10:
 						preview.size += 10;
+						set_default_size(preview.size, preview.size);
 						break;
 					default:
 						break;
@@ -96,7 +97,7 @@ namespace Picky {
 
 
 			preview = new ColorPreview();
-			preview.size = 150;
+			preview.size = preview_size;
 			this.add(preview);
 
 			window = Gdk.get_default_root_window();
@@ -116,7 +117,7 @@ namespace Picky {
 
 
 			Idle.add( () => {
-				pick_color();
+				update_preview();
 				return true;
 			});
 
@@ -159,28 +160,30 @@ namespace Picky {
 
 		protected void pick() {
 
-			clipboard.set_text(color_string, -1);
+			// Copy current color to clipboard
+			clipboard.set_text(preview.color.get_string(color_format), -1);
+			// Emit signal
 			picked(preview.color);
 		}
 
 
-		public void pick_color() {
+		public void update_preview() {
 
 			// Update the preview
 			preview.queue_draw();
 
 			// Move window (track mouse position)
-			int x, y, posX, posY, offset = 75;
+			int x, y, posX, posY, offset = preview.size / 2;
 
 			window.get_device_position(mouse, out x, out y, null);
 			posX = x + offset;
 			posY = y + offset;
 
-			if (posX + previewSize >= display.get_default_screen().get_width()) {
-				posX = x - (offset + previewSize);
+			if (posX + preview_size >= display.get_default_screen().get_width()) {
+				posX = x - (offset + preview_size);
 			}
-			if (posY + previewSize >= display.get_default_screen().get_height()) {
-				posY = y - (offset + previewSize);
+			if (posY + preview_size >= display.get_default_screen().get_height()) {
+				posY = y - (offset + preview_size);
 			}
 
 			move(posX, posY);

@@ -18,7 +18,6 @@ namespace Picky {
 		public Color() {
 
 			populate_x11names();
-
 			alpha = 1.0;
 		}
 
@@ -28,7 +27,6 @@ namespace Picky {
 			red = d;
 			blue = d;
 			green = d;
-
 		}
 
 
@@ -1716,7 +1714,5 @@ namespace Picky {
 			x11names.set(0xFFFFF0, "Ivory");
 			x11names.set(0xFFFFFF, "White");
 		}
-
 	}
-	
 }

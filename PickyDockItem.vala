@@ -17,7 +17,10 @@ namespace Picky {
 		
 		Gdk.Pixbuf icon_pixbuf;
 
+		bool swatch;
 
+		PickyPreferences prefs;
+  
 		public PickyDockItem.with_dockitem_file(GLib.File file) {
 			GLib.Object(Prefs: new PickyPreferences.with_file(file));
 		}
@@ -28,10 +31,10 @@ namespace Picky {
 			Logger.initialize("picky");
 			Logger.DisplayLevel = LogLevel.NOTIFY;
 
-			unowned PickyPreferences prefs = (PickyPreferences) Prefs;
-			
+			prefs = (PickyPreferences) Prefs;
+			swatch = prefs.Swatch;
 			Icon = "resource://" + Picky.G_RESOURCE_PATH + "/icons/color_picker.png";
-			CountVisible = false;
+			CountVisible = prefs.Count;
 
 			try {
 				icon_pixbuf = new Gdk.Pixbuf.from_resource(Picky.G_RESOURCE_PATH + "/icons/color_picker.png");
@@ -57,10 +60,9 @@ namespace Picky {
 
 			colors = new Gee.ArrayList<Color?>();
 
-
 			var datadir_path = GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,
-				Environment.get_user_data_dir(), 
-				Environment.get_application_name(),
+				Environment.get_user_data_dir(),	// .local/share 
+				Environment.get_application_name(), // plank
 				"picky"
 			);
 			Logger.notification(datadir_path);
@@ -100,7 +102,7 @@ namespace Picky {
 			ctx.paint();
 
 			Color color;
-			if (colors.size == 0) {
+			if (!swatch || colors.size == 0) {
 				return;
 			}
 			else if (cur_position == 0 || cur_position > colors.size) {
@@ -237,11 +239,11 @@ namespace Picky {
 
 			if (button == PopupButton.LEFT) {
 
-				var picker_window = new Picky.PickerWindow(type);
+				var picker_window = new Picky.PickerWindow(type, prefs.PreviewSize);
 				picker_window.picked.connect( (color) => {
 					add_color(color);
-					State = ItemState.URGENT;
-					Logger.notification("Pcked a color: " + color.get_string(type));
+					/* State = ItemState.URGENT; */
+					/* Logger.notification("Pcked a color: " + color.get_string(type)); */
 				});
 				picker_window.open_picker();
 
