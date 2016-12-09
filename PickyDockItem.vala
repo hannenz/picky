@@ -58,7 +58,24 @@ namespace Picky {
 			colors = new Gee.ArrayList<Color?>();
 
 
-			var filepath = GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S, Environment.get_home_dir(), Picky.PALETTE_FILE);
+			var datadir_path = GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,
+				Environment.get_user_data_dir(), 
+				Environment.get_application_name(),
+				"picky"
+			);
+			Logger.notification(datadir_path);
+			if (!FileUtils.test(datadir_path, FileTest.EXISTS)) {
+				Logger.notification("Dir %s does not exist, trying to create it".printf(datadir_path));
+				File datadir = File.new_for_path(datadir_path);
+				try {
+					datadir.make_directory();
+				}
+				catch(Error e) {
+					Logger.notification("Error: " + e.message);
+				}
+			}
+
+			var filepath = GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S, datadir_path, Picky.PALETTE_FILE);
 			palette = GLib.File.new_for_path(filepath);
 
 			load_palette();

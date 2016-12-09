@@ -24,7 +24,7 @@ namespace Picky {
 	/**
 	 * Filename for palette storage (in home directory)
 	 */
-	public const string PALETTE_FILE = ".picky";
+	public const string PALETTE_FILE = "palette";
 
 
 	public class PickyDocklet : Object, Plank.Docklet {
