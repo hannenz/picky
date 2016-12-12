@@ -8,7 +8,7 @@ namespace Picky {
 		
 		public int size { get; set; default = 64; }
 		public double scale { get; set; default = 4.0; }
-		public double scale_factor { get; set; default = 1.3333; }
+		public double scaling_factor { get; set; default = 1.3333; }
 		public double min_scale { get; set; default = 1.0; }
 		public double max_scale { get; set; default = 16.0; }
 		public Color color {get; set; }
@@ -39,11 +39,11 @@ namespace Picky {
 		}
 
 		public void scale_up() {
-			scale = double.min(scale * scale_factor, max_scale);
+			scale = double.min(scale * scaling_factor, max_scale);
 		}
 		
 		public void scale_down() {
-			scale = double.max(scale / scale_factor, min_scale);
+			scale = double.max(scale / scaling_factor, min_scale);
 		}
 
 		protected bool on_draw(Context ctx) {

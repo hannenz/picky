@@ -22,8 +22,6 @@ namespace Picky {
 		protected Gdk.Device mouse;
 		protected Gdk.Device keyboard;
 		protected int preview_size;
-		protected int winposx;
-		protected int winposy;
 
 		public signal void picked(Color color_string);
 
@@ -259,15 +257,16 @@ namespace Picky {
 			int x,y;
 			window.get_device_position(mouse, out x, out y, null);
 			switch (dir) {
-				case dir.UP:
+				case Direction.UP:
 					y--;
 					break;
-				case dir.DOWN:
-					y++;break;
-				case dir.LEFT:
+				case Direction.DOWN:
+					y++;
+					break;
+				case Direction.LEFT:
 					x--;
 					break;
-				case dir.RIGHT:
+				case Direction.RIGHT:
 					x++;
 					break;
 			}
