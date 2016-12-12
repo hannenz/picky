@@ -103,6 +103,22 @@ namespace Picky {
 						move_pointer(Direction.RIGHT);
 						break;
 
+					/**
+					 * Little Goodie for VIM users
+					 */
+					case Gdk.Key.j:
+						move_pointer(Direction.DOWN);
+						break;
+					case Gdk.Key.k:
+						move_pointer(Direction.UP);
+						break;
+					case Gdk.Key.h:
+						move_pointer(Direction.LEFT);
+						break;
+					case Gdk.Key.l:
+						move_pointer(Direction.RIGHT);
+						break;
+
 
 					default:
 						break;
