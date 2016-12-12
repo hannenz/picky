@@ -190,7 +190,12 @@ namespace Picky {
 
 
 
-
+		/**
+		 * Open (activate) the preview window/ color picker
+		 * Grabs the mouse pointer and keyboard
+		 *
+		 * @return void
+		 */
 		public void open_picker () {
 
 			var crosshair = new Gdk.Cursor.for_display(display, Gdk.CursorType.CROSSHAIR);
@@ -214,6 +219,12 @@ namespace Picky {
 
 
 
+		/**
+		 * Close (activate) the preview window/ color picker
+		 * Un-Grabs the mouse pointer and keyboard
+		 *
+		 * @return void
+		 */
 		protected void close_picker () {
 			this.mouse.ungrab(Gdk.CURRENT_TIME);
 			this.keyboard.ungrab(Gdk.CURRENT_TIME);
@@ -222,6 +233,11 @@ namespace Picky {
 
 		
 
+		/**
+		 * Copy current color to clipboard and emit "picked" signal
+		 * 
+		 * @return void
+		 */
 		protected void pick() {
 
 			// Copy current color to clipboard
@@ -231,6 +247,13 @@ namespace Picky {
 		}
 
 
+
+		/**
+		 * Updates the preview window's position depending on
+		 * the current mouse pointer position
+		 *
+		 * @return void
+		 */
 		public void update_preview() {
 
 			// Update the preview
@@ -253,7 +276,17 @@ namespace Picky {
 			move(posX, posY);
 		}
 
+
+
+		/**
+		 * Moves the mouse pointer (and thus the preview window)
+		 * one pixel in the given direction
+		 *
+		 * @param Picky.Direction dir		The direction to move
+		 * @return void
+		 */
 		public void move_pointer(Direction dir) {
+
 			int x,y;
 			window.get_device_position(mouse, out x, out y, null);
 			switch (dir) {
