@@ -48,7 +48,7 @@ namespace Picky {
 
 			this.add_events(
 				EventMask.KEY_PRESS_MASK |
-				EventMask.BUTTON_PRESS_MASK |
+
 				EventMask.SCROLL_MASK
 			);
 
@@ -61,6 +61,12 @@ namespace Picky {
 			this.key_press_event.connect( (event_key) => {
 				switch (event_key.keyval){
 					case Gdk.Key.space:
+						pick();
+						if ((Gdk.ModifierType.SHIFT_MASK & event_key.state) == 0) {
+							close_picker();
+						}
+						break;
+					case Gdk.Key.Return:
 						pick();
 						if ((Gdk.ModifierType.SHIFT_MASK & event_key.state) == 0) {
 							close_picker();
