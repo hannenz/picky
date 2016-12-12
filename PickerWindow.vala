@@ -4,6 +4,13 @@ using Cairo;
 
 namespace Picky {
 
+	public enum Direction {
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT
+	}
+
 	public class PickerWindow : Gtk.Window {
 
 		protected Gdk.Window window;
@@ -15,11 +22,19 @@ namespace Picky {
 		protected Gdk.Device mouse;
 		protected Gdk.Device keyboard;
 		protected int preview_size;
+		protected int winposx;
+		protected int winposy;
 
 		public signal void picked(Color color_string);
 
 		/**
 		 * Constructor
+		 *
+		 * Consturcts a window containing a color picker preview (ColorPreview)
+		 * and set up handlers for keyboard and mouse
+		 * 
+		 * @param ColorSpecType type			The color format to use (HEX, RGB or X11NAME)
+		 * @param int			size			The size of the windo (square)
 		 */
 		public PickerWindow(ColorSpecType type, int size) {
 			Object(type: Gtk.WindowType.POPUP);
@@ -37,6 +52,12 @@ namespace Picky {
 				EventMask.SCROLL_MASK
 			);
 
+
+			// Connect signals
+
+			// Keyboard: SPACE BAR pick color (with SHIFT: keep picking, else pick & close)
+			// ESC: Close picker window
+			// F9/F10: Change window size (experimental)
 			this.key_press_event.connect( (event_key) => {
 				switch (event_key.keyval){
 					case Gdk.Key.space:
@@ -54,10 +75,29 @@ namespace Picky {
 						preview.size -= 10;
 						set_default_size(preview.size, preview.size);
 						break;
+
 					case Gdk.Key.F10:
 						preview.size += 10;
 						set_default_size(preview.size, preview.size);
 						break;
+
+					case Gdk.Key.Down:
+						move_pointer(Direction.DOWN);
+						break;
+
+					case Gdk.Key.Up:
+						move_pointer(Direction.UP);
+						break;
+
+					case Gdk.Key.Left:
+						move_pointer(Direction.LEFT);
+						break;
+
+					case Gdk.Key.Right:
+						move_pointer(Direction.RIGHT);
+						break;
+
+
 					default:
 						break;
 
@@ -65,6 +105,10 @@ namespace Picky {
 				return false;
 			});
 
+
+			// Mouse:	LEFT CLICK: pick and close
+			//			RIGHT CLICK: pick and keep window open
+			//			WHEEL UP/DOWN: Zoom preview in/out
 			this.button_press_event.connect( (event_button) => {
 				if (event_button.type == EventType.BUTTON_PRESS) {
 					switch (event_button.button) {
@@ -80,7 +124,7 @@ namespace Picky {
 				}
 				return true;
 			});
-
+			
 			this.scroll_event.connect( (event_scroll) => {
 
 				switch (event_scroll.direction) {
@@ -187,6 +231,26 @@ namespace Picky {
 			}
 
 			move(posX, posY);
+		}
+
+		public void move_pointer(Direction dir) {
+			int x,y;
+			window.get_device_position(mouse, out x, out y, null);
+			switch (dir) {
+				case dir.UP:
+					y--;
+					break;
+				case dir.DOWN:
+					y++;break;
+				case dir.LEFT:
+					x--;
+					break;
+				case dir.RIGHT:
+					x++;
+					break;
+			}
+
+			mouse.warp(Gdk.Screen.get_default(), x, y);
 		}
 	}
 }
